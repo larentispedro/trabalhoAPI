@@ -1,0 +1,32 @@
+body {
+    background-color: #f4f4f4; /* Deixa o fundo da página com um cinza bem claro */
+}
+
+.container {
+    max-width: 960px; /* Limita a largura máxima do conteúdo principal para melhor leitura em telas grandes */
+}
+
+.card-header {
+    font-weight: bold; 
+}
+
+
+.btn-primary {
+    background-color: #667687; 
+    border-color: #929ea3;
+}
+
+.btn-primary:hover {
+    background-color: #3b39376a; 
+    border-color: #090a09;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+#clima-atual .card,
+#previsao-container .card {
+    animation: fadeIn 0.5s ease-in-out;
+}

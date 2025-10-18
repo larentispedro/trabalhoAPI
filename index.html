@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Previsão do Tempo</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha344-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    
+    <link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+    <main class="container my-4">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h1 class="text-center mb-4">Previsão do Tempo</h1>
+                <div class="row justify-content-center">
+                    <div class="col-md-8 d-flex">
+                        <input type="text" id="campo-cidade" class="form-control me-2" placeholder="Digite o nome de uma cidade">
+                        <button id="btn-buscar" class="btn btn-primary">Buscar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="clima-atual" class="mt-4">
+            </div>
+
+        <div id="previsao-container" class="mt-4">
+            </div>
+    </main>
+
+    <footer class="text-center my-4 text-muted">
+        <p>Pedro Augusto Larentis Maldaner | Disciplina: Fundamentos ao Desenvolvimento Web</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+
+    <script>
+        
+        const apiKey = "dbe8956775028d1a39be909dc47347a4";
+
+        
+        const campoCidade = document.getElementById('campo-cidade');
+        const btnBuscar = document.getElementById('btn-buscar');
+        const climaAtualContainer = document.getElementById('clima-atual');
+        const previsaoContainer = document.getElementById('previsao-container');
+
+       
+        btnBuscar.addEventListener('click', () => {
+            const cidade = campoCidade.value;
+            if (cidade) {
+                buscarDadosDoClima(cidade);
+            } else {
+                alert("Por favor, digite o nome de uma cidade.");
+            }
+        });
+
+      
+        async function buscarDadosDoClima(cidade) {
+          
+            climaAtualContainer.innerHTML = '<p class="text-center">Carregando...</p>';
+            previsaoContainer.innerHTML = '';
+
+            try {
+                
+                const geoResponse = await fetch(`https://api.openweathermap.org/geo/1.0/direct?q=${cidade}&limit=1&appid=${apiKey}`);
+                const geoData = await geoResponse.json();
+
+                if (geoData.length === 0) {
+                    alert("Cidade não encontrada.");
+                    climaAtualContainer.innerHTML = '';
+                    return;
+                }
+
+                const { lat, lon, name } = geoData[0];
+
+             
+                const climaAtualResponse = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric&lang=pt_br`);
+                const climaAtualData = await climaAtualResponse.json();
+                exibirClimaAtual(climaAtualData);
+
+            
+                const previsaoResponse = await fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric&lang=pt_br`);
+                const previsaoData = await previsaoResponse.json();
+                exibirPrevisao(previsaoData.list);
+
+            } catch (error) {
+                console.error("Erro ao buscar dados do clima:", error);
+                climaAtualContainer.innerHTML = '<p class="text-center text-danger">Ocorreu um erro ao buscar os dados.</p>';
+                alert("Ocorreu um erro ao buscar os dados do clima. Tente novamente.");
+            }
+        }
+
+        
+        function exibirClimaAtual(data) {
+            climaAtualContainer.innerHTML = `
+                <div class="card shadow-sm">
+                    <div class="card-header text-center">
+                        Clima Atual em ${data.name}
+                    </div>
+                    <div class="card-body d-flex flex-column flex-md-row align-items-center justify-content-around text-center">
+                        <div>
+                            <img src="https://openweathermap.org/img/wn/${data.weather[0].icon}@4x.png" alt="Ícone do tempo">
+                            <h5 class="card-title text-capitalize">${data.weather[0].description}</h5>
+                        </div>
+                        <div>
+                            <p class="fs-1 mb-1">${data.main.temp.toFixed(1)}°C</p>
+                            <p class="card-text">Sensação Térmica: ${data.main.feels_like.toFixed(1)}°C</p>
+                        </div>
+                        <div>
+                            <p class="card-text"><i class="bi bi-droplet-fill"></i> Umidade: ${data.main.humidity}%</p>
+                            <p class="card-text"><i class="bi bi-wind"></i> Vel. do Vento: ${data.wind.speed} m/s</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+       
+        function exibirPrevisao(previsaoList) {
+            // Filtra a lista para pegar a previsão para o meio-dia dos próximos dias
+            const previsoesFiltradas = previsaoList.filter(item => item.dt_txt.includes("12:00:00"));
+
+            let filhos = '<h2 class="text-center mt-4">Previsão para os Próximos Dias</h2>';
+            filhos += '<div class="row mt-3">';
+
+            previsoesFiltradas.forEach(previsao => {
+                const data = new Date(previsao.dt * 1000);
+                const diaDaSemana = data.toLocaleDateString('pt-BR', { weekday: 'long' });
+
+                filhos += `
+                    <div class="col-lg col-md-4 col-sm-6 mb-3">
+                        <div class="card text-center shadow-sm h-100">
+                            <div class="card-body">
+                                <h6 class="card-title">${diaDaSemana}</h6>
+                                <img src="https://openweathermap.org/img/wn/${previsao.weather[0].icon}@2x.png" alt="Ícone do tempo">
+                                <p class="card-text fs-5">${previsao.main.temp.toFixed(1)}°C</p>
+                                <p class="card-text text-capitalize small">${previsao.weather[0].description}</p>
+                            </div>
+                        </div>
+                    </div>`;
+            });
+
+            filhos += '</div>';
+            previsaoContainer.innerHTML = filhos;
+        }
+    </script>
+</body>
+
+</html>
