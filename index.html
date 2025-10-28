@@ -66,17 +66,17 @@
 
     <script>
         
-        // --- PARTE 1: CHAVE (VAZADA) DA OPENWEATHER ---
+        
         const apiKey = "dbe8956775028d1a39be909dc47347a4";
 
-        // --- PARTE 2: MATRÍCULA ---
+        
         const SUA_MATRICULA = "438141"; 
         
-        // Instancia o Modal do Bootstrap
+        
         const modalLogs = new bootstrap.Modal(document.getElementById('modalLogs'));
         const modalLogsCorpo = document.getElementById('modalLogsCorpo');
         
-        // Seletores da Parte 1
+        
         const campoCidade = document.getElementById('campo-cidade');
         const btnBuscar = document.getElementById('btn-buscar');
         const climaAtualContainer = document.getElementById('clima-atual');
@@ -99,14 +99,14 @@
             previsaoContainer.innerHTML = '';
 
             try {
-                // --- Métodos da Parte 1 (OpenWeather) ---
+                //Métodos da parte 1 
                 const geoResponse = await fetch(`https://api.openweathermap.org/geo/1.0/direct?q=${cidade}&limit=1&appid=${apiKey}`);
                 const geoData = await geoResponse.json();
 
                 if (geoData.length === 0) {
                     alert("Cidade não encontrada.");
                     climaAtualContainer.innerHTML = '';
-                    // --- PARTE 2: Log de Erro ---
+                    
                     registrarLog("OpenWeatherGeo", "BuscaPorNome", `Falha - Cidade não encontrada: ${cidade}`);
                     return;
                 }
@@ -121,7 +121,7 @@
                 const previsaoData = await previsaoResponse.json();
                 exibirPrevisao(previsaoData.list);
 
-                // --- PARTE 2: Log de Sucesso ---
+               
                 const apiNome = "OpenWeather";
                 const metodoNome = "BuscaClimaCompleto";
                 const resultadoLog = `Sucesso: ${climaAtualData.name} - ${climaAtualData.main.temp.toFixed(1)}°C`;
@@ -132,7 +132,7 @@
                 climaAtualContainer.innerHTML = '<p class="text-center text-danger">Ocorreu um erro ao buscar os dados.</p>';
                 alert("Ocorreu um erro ao buscar os dados do clima. Tente novamente.");
                 
-                // --- PARTE 2: Log de Erro Geral ---
+                
                 registrarLog("OpenWeather", "BuscaClimaCompleto", `ERRO GERAL: ${error.message}`);
             }
         }
@@ -189,17 +189,14 @@
             previsaoContainer.innerHTML = filhos;
         }
 
-        // ===================================================================
-        // FUNÇÕES DA PARTE 2: API DE LOG DO PROFESSOR
-        // ===================================================================
-
+        
         /**
-         * Funcionalidade 1: Registra um log
+         Funcionalidade 1: Registrar um log
          */
         async function registrarLog(api, metodo, resultado) {
             const url = `https://www.piway.com.br/unoesc/api/inserir/log/${SUA_MATRICULA}/${encodeURIComponent(api)}/${encodeURIComponent(metodo)}/${encodeURIComponent(resultado)}`;
             try {
-                // A API do professor espera um GET (padrão do fetch)
+               
                 const response = await fetch(url);
                 const data = await response.json();
                 console.log("Log registrado:", data);
@@ -213,7 +210,7 @@
          */
         async function exibirLogs() {
             modalLogsCorpo.innerHTML = '<p class="text-center">Carregando logs...</p>';
-            modalLogs.show(); // Mostra o modal
+            modalLogs.show();
 
             try {
                 const response = await fetch(`https://www.piway.com.br/unoesc/api/logs/${SUA_MATRICULA}`);
@@ -270,7 +267,7 @@
         }
 
         /**
-         * Funcionalidade 3: Exclui um log específico
+         * Funcionalidade 3: Exclui um log 
          */
         async function excluirLog(idLog) {
             if (!confirm(`Tem certeza que deseja excluir o log ID ${idLog}?`)) {
@@ -280,12 +277,12 @@
             const url = `https://www.piway.com.br/unoesc/api/excluir/log/${idLog}/aluno/${SUA_MATRICULA}`;
             
             try {
-                // CORREÇÃO 1: Removido o 'method: DELETE' para evitar erro de CORS
+                
                 const response = await fetch(url); 
                 const data = await response.json();
                 
                 console.log("Log excluído:", data);
-                exibirLogs(); // Atualiza a lista de logs no modal
+                exibirLogs();
             
             } catch (err) {
                 console.error("Erro ao excluir log:", err);
